@@ -35,6 +35,8 @@ const Home: NextPage = () => {
           alt="medium large logo"
         />
       </div>
+
+      {/* Posts */}
     </div>
   )
 }
