@@ -4,6 +4,7 @@ import { sanityClient, urlFor } from '../../sanity';
 import { Post } from '../../typings';
 import PortableText from 'react-portable-text';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import { useState } from 'react';
 
 interface IFormInput {
   _id: string;
@@ -17,6 +18,9 @@ interface Props {
 }
 
 function Post({ post }: Props) {
+  console.log(post);
+  const [submitted, setSubmitted] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -30,9 +34,11 @@ function Post({ post }: Props) {
     })
       .then(() => {
         console.log(data);
+        setSubmitted(true);
       })
       .catch((err) => {
         console.log(err);
+        setSubmitted(false);
       });
   };
 
@@ -93,67 +99,78 @@ function Post({ post }: Props) {
 
       <hr className="my-5 mx-auto max-w-lg border border-yellow-500" />
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className=" mx-auto mb-10 flex max-w-2xl flex-col p-5"
-      >
-        <h3 className="text-sm text-yellow-500">Enjoyed this article?</h3>
-        <h4 className="text-3xl font-bold">Leave a comment below. </h4>
-        <hr className="mt-2 py-3" />
-
-        <label className="mb-5 block">
-          <span className="text-gray-700">Name</span>
-          <input
-            {...register('name', { required: true })}
-            className="form-input mt-1 block w-full rounded border py-2 px-3 shadow
-            outline-none ring-yellow-500 focus:ring"
-            type="text"
-            placeholder="Name"
-          />
-        </label>
-
-        <label className="mb-5 block">
-          <span className="text-gray-700">Email</span>
-          <input
-            {...register('email', { required: true })}
-            className="form-input mt-1 block w-full rounded border py-2 px-3 shadow
-            outline-none ring-yellow-500 focus:ring"
-            type="email"
-            placeholder="Email"
-          />
-        </label>
-
-        <label className="mb-5 block">
-          <span className="text-gray-700">Comment</span>
-          <textarea
-            {...register('comment', { required: true })}
-            className="form-textarea  mt-1 block w-full rounded border py-2 px-3
-            shadow outline-none ring-yellow-500 focus:ring"
-            rows={8}
-            placeholder="Comment"
-          />
-        </label>
-
-        <div className="flex flex-col p-5">
-          {errors.name && (
-            <span className="text-red-500">- The name field is required</span>
-          )}
-          {errors.email && (
-            <span className="text-red-500">- The email field is required</span>
-          )}
-          {errors.comment && (
-            <span className="text-red-500">
-              - The comment field is required
-            </span>
-          )}
+      {submitted ? (
+        <div className="my-10 mx-auto flex max-w-2xl flex-col bg-yellow-500 p-10 text-white">
+          <h1 className="text-3xl font-bold">
+            Your comment have been submitted and subjected to approval.
+          </h1>
+          <p>Once it has been approved, it will appear below.</p>
         </div>
+      ) : (
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className=" mx-auto mb-10 flex max-w-2xl flex-col p-5"
+        >
+          <h3 className="text-sm text-yellow-500">Enjoyed this article?</h3>
+          <h4 className="text-3xl font-bold">Leave a comment below. </h4>
+          <hr className="mt-2 py-3" />
 
-        <input
-          type="submit"
-          className="focus:shadow-outline cursor-pointer rounded bg-yellow-500 py-2
+          <label className="mb-5 block">
+            <span className="text-gray-700">Name</span>
+            <input
+              {...register('name', { required: true })}
+              className="form-input mt-1 block w-full rounded border py-2 px-3 shadow
+            outline-none ring-yellow-500 focus:ring"
+              type="text"
+              placeholder="Name"
+            />
+          </label>
+
+          <label className="mb-5 block">
+            <span className="text-gray-700">Email</span>
+            <input
+              {...register('email', { required: true })}
+              className="form-input mt-1 block w-full rounded border py-2 px-3 shadow
+            outline-none ring-yellow-500 focus:ring"
+              type="email"
+              placeholder="Email"
+            />
+          </label>
+
+          <label className="mb-5 block">
+            <span className="text-gray-700">Comment</span>
+            <textarea
+              {...register('comment', { required: true })}
+              className="form-textarea  mt-1 block w-full rounded border py-2 px-3
+            shadow outline-none ring-yellow-500 focus:ring"
+              rows={8}
+              placeholder="Comment"
+            />
+          </label>
+
+          <div className="flex flex-col p-5">
+            {errors.name && (
+              <span className="text-red-500">- The name field is required</span>
+            )}
+            {errors.email && (
+              <span className="text-red-500">
+                - The email field is required
+              </span>
+            )}
+            {errors.comment && (
+              <span className="text-red-500">
+                - The comment field is required
+              </span>
+            )}
+          </div>
+
+          <input
+            type="submit"
+            className="focus:shadow-outline cursor-pointer rounded bg-yellow-500 py-2
           px-4 font-bold text-white shadow hover:bg-yellow-400 focus:outline-none"
-        />
-      </form>
+          />
+        </form>
+      )}
     </main>
   );
 }
@@ -191,6 +208,11 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   name,
   image
 },
+'comments': *[
+  _type == "comment" &&
+  post._ref == ^._id &&
+  approved == true
+],
 description,
 mainImage,
 slug,
