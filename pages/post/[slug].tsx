@@ -1,19 +1,19 @@
-import { GetStaticProps } from 'next'
-import Header from '../../components/Header'
-import { sanityClient, urlFor } from '../../sanity'
-import { Post } from '../../typings'
-import PortableText from 'react-portable-text'
-import { useForm, SubmitHandler } from 'react-hook-form'
+import { GetStaticProps } from 'next';
+import Header from '../../components/Header';
+import { sanityClient, urlFor } from '../../sanity';
+import { Post } from '../../typings';
+import PortableText from 'react-portable-text';
+import { useForm, SubmitHandler } from 'react-hook-form';
 
 interface IFormInput {
-  _id: string
-  name: string
-  email: string
-  comment: string
+  _id: string;
+  name: string;
+  email: string;
+  comment: string;
 }
 
 interface Props {
-  post: Post
+  post: Post;
 }
 
 function Post({ post }: Props) {
@@ -21,11 +21,20 @@ function Post({ post }: Props) {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<IFormInput>()
+  } = useForm<IFormInput>();
 
-  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-    console.log(data)
-  }
+  const onSubmit: SubmitHandler<IFormInput> = (data) => {
+    fetch('/api/createComment', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+      .then(() => {
+        console.log(data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   return (
     <main>
@@ -146,10 +155,10 @@ function Post({ post }: Props) {
         />
       </form>
     </main>
-  )
+  );
 }
 
-export default Post
+export default Post;
 
 export const getStaticPaths = async () => {
   const query = `*[_type == "post"]{
@@ -157,21 +166,21 @@ export const getStaticPaths = async () => {
         slug {
             current
         }
-    }`
+    }`;
 
-  const posts = await sanityClient.fetch(query)
+  const posts = await sanityClient.fetch(query);
 
   const paths = posts.map((post: Post) => ({
     params: {
       slug: post.slug.current,
     },
-  }))
+  }));
 
   return {
     paths,
     fallback: 'blocking',
-  }
-}
+  };
+};
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const query = `* [_type == 'post' && slug.current == $slug][0]{
@@ -187,18 +196,18 @@ mainImage,
 slug,
 body
   
-}`
+}`;
 
   const post = await sanityClient.fetch(query, {
     slug: params?.slug,
-  })
+  });
 
   if (!post) {
     return {
       props: {
         notFound: true,
       },
-    }
+    };
   }
 
   return {
@@ -206,5 +215,5 @@ body
       post,
     },
     revalidate: 60, // updates the page after 60 secs
-  }
-}
+  };
+};
